@@ -1,0 +1,36 @@
+name: Deploy VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to deploy
+        required: true
+        default: main
+
+jobs:
+  deploy:
+    name: Deploy to self-hosted VPS
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-vps
+      cancel-in-progress: false
+
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 0700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 0600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.VPS_PORT || '22' }}" "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Run VPS swap
+        env:
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
+          VPS_REPO_PATH: ${{ vars.VPS_REPO_PATH || '/opt/maw-board/app' }}
+          DEPLOY_REF: ${{ inputs.ref }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" \
+            "cd '$VPS_REPO_PATH' && git fetch --prune origin '$DEPLOY_REF' && git checkout --detach FETCH_HEAD && deploy/swap.sh"

@@ -113,7 +113,10 @@
   function showToolbar() {
     toolbarVisible = true;
     clearTimeout(toolbarHideTimer);
-    toolbarHideTimer = setTimeout(() => (toolbarVisible = false), TOOLBAR_HIDE_MS);
+    toolbarHideTimer = setTimeout(
+      () => (toolbarVisible = false),
+      TOOLBAR_HIDE_MS,
+    );
   }
   onMount(() => {
     const onMove = (e: PointerEvent) => {
@@ -223,7 +226,8 @@
   // Set when we joined a fresh empty session before write-perms were known, so
   // the auto-create can fire once canWrite arrives (handleCreate needs canEdit).
   let autoCreatePending = false;
-  let pendingPortraitCreates: { x: number; y: number; expiresAt: number }[] = [];
+  let pendingPortraitCreates: { x: number; y: number; expiresAt: number }[] =
+    [];
 
   // ── maw share workboard extensions ──
   let boardItems: BoardItem[] = [];
@@ -318,8 +322,9 @@
                 const stream = streams[0] ?? new MediaStream([track]);
                 remoteVideos = { ...remoteVideos, [uid]: stream };
                 track.addEventListener("ended", () => {
-                  const { [uid]: _gone, ...rest } = remoteVideos;
-                  remoteVideos = rest;
+                  const nextVideos = { ...remoteVideos };
+                  delete nextVideos[uid];
+                  remoteVideos = nextVideos;
                 });
               }
             },
@@ -356,8 +361,9 @@
             rtcMesh?.removePeer(id);
             remoteAudios[id]?.pause();
             delete remoteAudios[id];
-            const { [id]: _goneVideo, ...restVideos } = remoteVideos;
-            remoteVideos = restVideos;
+            const nextVideos = { ...remoteVideos };
+            delete nextVideos[id];
+            remoteVideos = nextVideos;
           }
         } else if (message.shells) {
           const previousShellIds = new Set(shells.map(([id]) => id));
@@ -407,8 +413,13 @@
           // [from_uid, to_uid, payload] (broadcast — client filters).
           const sig = message.signal as number[] & string[];
           if (sig.length === 3) {
-            const [from, to, payload] = sig as unknown as [number, number, string];
-            if (to === userId) rtcMesh?.handleSignal(from, payload).catch(() => {});
+            const [from, to, payload] = sig as unknown as [
+              number,
+              number,
+              string,
+            ];
+            if (to === userId)
+              rtcMesh?.handleSignal(from, payload).catch(() => {});
           } else {
             const [from, payload] = sig as unknown as [number, string];
             rtcMesh?.handleSignal(from, payload).catch(() => {});
@@ -534,7 +545,9 @@
       makeToast({
         kind: "info",
         message: lockedForMe
-          ? `Board is locked by ${boardLock?.ownerName ?? "someone"} — read-only.`
+          ? `Board is locked by ${
+              boardLock?.ownerName ?? "someone"
+            } — read-only.`
           : "You are in read-only mode and cannot create new terminals.",
       });
       return;
@@ -599,8 +612,8 @@
       live !== undefined
         ? live
         : shells.some(([sid]) => sid === lastFocused)
-          ? lastFocused
-          : undefined;
+        ? lastFocused
+        : undefined;
     if (target === undefined) {
       makeToast({
         kind: "info",
@@ -617,8 +630,8 @@
       live !== undefined
         ? live
         : shells.some(([sid]) => sid === lastFocused)
-          ? lastFocused
-          : undefined;
+        ? lastFocused
+        : undefined;
     if (target === undefined) {
       makeToast({
         kind: "info",
@@ -631,16 +644,16 @@
       key === "Enter"
         ? "\r"
         : key === "Backspace"
-          ? "\x7f"
-          : key === "ArrowUp"
-            ? "\x1b[A"
-            : key === "ArrowDown"
-              ? "\x1b[B"
-              : key === "ArrowRight"
-                ? "\x1b[C"
-                : key === "ArrowLeft"
-                  ? "\x1b[D"
-                  : key;
+        ? "\x7f"
+        : key === "ArrowUp"
+        ? "\x1b[A"
+        : key === "ArrowDown"
+        ? "\x1b[B"
+        : key === "ArrowRight"
+        ? "\x1b[C"
+        : key === "ArrowLeft"
+        ? "\x1b[D"
+        : key;
     handleInput(target, new TextEncoder().encode(text));
   }
 
@@ -728,7 +741,11 @@
 
     function handleMouse(event: MouseEvent) {
       if (moving !== -1 && !movingIsDone) {
-        if (event instanceof PointerEvent && movingPointerId !== null && event.pointerId !== movingPointerId) {
+        if (
+          event instanceof PointerEvent &&
+          movingPointerId !== null &&
+          event.pointerId !== movingPointerId
+        ) {
           return;
         }
         const [x, y] = normalizePosition(event);
@@ -788,7 +805,11 @@
       }
 
       if (resizing !== -1) {
-        if (event instanceof PointerEvent && resizingPointerId !== null && event.pointerId !== resizingPointerId) {
+        if (
+          event instanceof PointerEvent &&
+          resizingPointerId !== null &&
+          event.pointerId !== resizingPointerId
+        ) {
           return;
         }
         const cols = Math.max(
@@ -810,14 +831,18 @@
 
     function handleMouseEnd(event: MouseEvent) {
       if (moving !== -1) {
-        if (event instanceof PointerEvent && movingPointerId !== null && event.pointerId !== movingPointerId) {
+        if (
+          event instanceof PointerEvent &&
+          movingPointerId !== null &&
+          event.pointerId !== movingPointerId
+        ) {
           return;
         }
         movingIsDone = true;
         sendMove.cancel();
-        let edgeSnap =
-          pendingEdgeSnap?.id === moving ? pendingEdgeSnap : null;
-        const mayEdgeSnap = event.type === "pointerup" || event.type === "mouseup";
+        let edgeSnap = pendingEdgeSnap?.id === moving ? pendingEdgeSnap : null;
+        const mayEdgeSnap =
+          event.type === "pointerup" || event.type === "mouseup";
         if (!edgeSnap && mayEdgeSnap) {
           const edgeAction = detectEdgeSnapAction(
             event.clientX,
@@ -840,7 +865,11 @@
       }
 
       if (resizing !== -1) {
-        if (event instanceof PointerEvent && resizingPointerId !== null && event.pointerId !== resizingPointerId) {
+        if (
+          event instanceof PointerEvent &&
+          resizingPointerId !== null &&
+          event.pointerId !== resizingPointerId
+        ) {
           return;
         }
         resizing = -1;
@@ -971,18 +1000,23 @@
   }
 
   // Add an image to the board (file picker, paste, or drag-and-drop).
+  // Local preview uses the original blob (sharp); peers get the encoded share.
   function addImage(file: File) {
     if (!canEdit) return;
-    readImageFile(file, (dataUrl, w, h) => {
+    const id = crypto.randomUUID();
+    const localUrl = URL.createObjectURL(file);
+    streamSrcs = { ...streamSrcs, [id]: localUrl };
+
+    readImageFile(file, (payload) => {
       const [x, y] = nextBoardPos();
       const item: BoardItem = {
-        id: crypto.randomUUID(),
+        id,
         kind: "image",
         x,
         y,
-        w,
-        h,
-        dataUrl,
+        w: payload.tileW,
+        h: payload.tileH,
+        dataUrl: payload.dataUrl,
       };
       upsertBoardItem(item);
       srocket?.send({ boardPut: item });
@@ -1160,11 +1194,18 @@
       });
     }
     for (const it of boardItems) {
-      if (it.kind === "doc" || it.kind === "lock" || it.kind === "label") continue;
+      if (it.kind === "doc" || it.kind === "lock" || it.kind === "label")
+        continue;
       // Skip degenerate rects (e.g. videos created with h=0) — a zero-height
       // rect would place bogus middle/bottom guides.
       if (!it.w || !it.h) continue;
-      rects.push({ id: it.id, left: it.x, top: it.y, width: it.w, height: it.h });
+      rects.push({
+        id: it.id,
+        left: it.x,
+        top: it.y,
+        width: it.w,
+        height: it.h,
+      });
     }
     return rects;
   })();
@@ -1500,7 +1541,11 @@
     else void applySnap(id, action);
   }
 
-  function cycleSnapAction(id: number, requested: SnapAction, current: ViewRect) {
+  function cycleSnapAction(
+    id: number,
+    requested: SnapAction,
+    current: ViewRect,
+  ) {
     const history = snapHistory[id];
     if (!history || !rectsClose(history.rect, current)) return requested;
 
@@ -1568,7 +1613,9 @@
     });
   }
 
-  function layoutKeyAction(event: KeyboardEvent): SnapAction | "restore" | null {
+  function layoutKeyAction(
+    event: KeyboardEvent,
+  ): SnapAction | "restore" | null {
     if (event.altKey || event.ctrlKey || event.metaKey) return null;
     switch (event.key) {
       case "ArrowLeft":
@@ -1629,7 +1676,9 @@
     // Current footprint — real when laid out, cols×cell estimate as fallback.
     const currentRect = terminalFootprint(id, ws);
     const resolvedAction =
-      options.cycle === false ? action : cycleSnapAction(id, action, currentRect);
+      options.cycle === false
+        ? action
+        : cycleSnapAction(id, action, currentRect);
     const rawTarget = computeSnapTarget(resolvedAction, view, currentRect);
     const gap =
       resolvedAction === "center" ||
@@ -1694,10 +1743,12 @@
       return;
     }
     srocket?.send({ move: [id, previous] });
-    const { [id]: _restore, ...restRestore } = snapRestore;
-    const { [id]: _history, ...restHistory } = snapHistory;
-    snapRestore = restRestore;
-    snapHistory = restHistory;
+    const nextRestore = { ...snapRestore };
+    const nextHistory = { ...snapHistory };
+    delete nextRestore[id];
+    delete nextHistory[id];
+    snapRestore = nextRestore;
+    snapHistory = nextHistory;
   }
 
   function handleSnapButton(id: number, action: string) {
@@ -1767,8 +1818,14 @@
       return {
         id,
         ws,
-        w: el && el.offsetWidth > 0 ? el.offsetWidth : ws.cols * cellW + CHROME_W,
-        h: el && el.offsetHeight > 0 ? el.offsetHeight : ws.rows * cellH + CHROME_H,
+        w:
+          el && el.offsetWidth > 0
+            ? el.offsetWidth
+            : ws.cols * cellW + CHROME_W,
+        h:
+          el && el.offsetHeight > 0
+            ? el.offsetHeight
+            : ws.rows * cellH + CHROME_H,
       };
     });
 
@@ -1860,12 +1917,17 @@
       // Real rendered footprint when the window has laid out (exact, matches the
       // grid + arrange.ts); cols×cell estimate only as an early-load fallback.
       const el = termWrappers[id];
-      const w = el && el.offsetWidth > 0 ? el.offsetWidth : ws.cols * cellW + CHROME_W;
-      const h = el && el.offsetHeight > 0 ? el.offsetHeight : ws.rows * cellH + CHROME_H;
+      const w =
+        el && el.offsetWidth > 0 ? el.offsetWidth : ws.cols * cellW + CHROME_W;
+      const h =
+        el && el.offsetHeight > 0
+          ? el.offsetHeight
+          : ws.rows * cellH + CHROME_H;
       add(ws.x, ws.y, w, h);
     }
     for (const it of boardItems) {
-      if (it.kind === "doc" || it.kind === "lock" || it.kind === "label") continue;
+      if (it.kind === "doc" || it.kind === "lock" || it.kind === "label")
+        continue;
       if (!it.w || !it.h) continue;
       add(it.x, it.y, it.w, it.h);
     }
@@ -2004,7 +2066,9 @@
     />
 
     {#if showNetworkInfo}
-      <div class="absolute top-20 left-2 right-2 sm:left-auto sm:right-auto translate-x-0 sm:translate-x-[116.5px] max-w-[calc(100vw-1rem)] sm:max-w-none">
+      <div
+        class="absolute top-20 left-2 right-2 sm:left-auto sm:right-auto translate-x-0 sm:translate-x-[116.5px] max-w-[calc(100vw-1rem)] sm:max-w-none"
+      >
         <NetworkInfo
           status={connected
             ? "connected"
@@ -2036,7 +2100,9 @@
     <span
       class="w-7 h-1 rounded-full bg-white/80 group-hover:w-9 group-hover:bg-white transition-all duration-200"
     />
-    <span class="text-white/80 text-[11px] leading-none group-hover:text-white">⌄</span>
+    <span class="text-white/80 text-[11px] leading-none group-hover:text-white"
+      >⌄</span
+    >
   </button>
 
   <!-- Lock banner: tells locked-out viewers why the board is read-only. -->
@@ -2142,7 +2208,8 @@
   -->
   <div
     class="absolute inset-0 -z-10"
-    style:background-image="radial-gradient(#282828 {zoom * 0.8}px, transparent 0)"
+    style:background-image="radial-gradient(#282828 {zoom * 0.8}px, transparent
+    0)"
     style:background-size="{24 * zoom}px {24 * zoom}px"
     style:background-position="{-zoom * center[0]}px {-zoom * center[1]}px"
   />
@@ -2180,7 +2247,9 @@
 
   <!-- Online users — vertical column down the left edge. -->
   {#if users.length > 0}
-    <div class="fixed left-3 top-24 z-30 max-h-[70vh] overflow-y-auto pointer-events-auto">
+    <div
+      class="fixed left-3 top-24 z-30 max-h-[70vh] overflow-y-auto pointer-events-auto"
+    >
       <NameList {users} vertical />
     </div>
   {/if}
@@ -2199,8 +2268,7 @@
       {snapTargets}
       extraGuidesV={termGuidesV}
       extraGuidesH={termGuidesH}
-      on:move={({ detail }) =>
-        handleBoardMove(detail.id, detail.x, detail.y)}
+      on:move={({ detail }) => handleBoardMove(detail.id, detail.x, detail.y)}
       on:resize={({ detail }) =>
         handleBoardResize(detail.id, detail.w, detail.h)}
       on:delete={({ detail }) => handleBoardDelete(detail)}

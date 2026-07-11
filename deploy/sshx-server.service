@@ -1,0 +1,25 @@
+[Unit]
+Description=maw-board sshx-server
+Documentation=https://github.com/MEYD-605/maw-board
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=maw-board
+Group=maw-board
+WorkingDirectory=/opt/maw-board/app
+EnvironmentFile=-/etc/maw-board/sshx-server.env
+ExecStart=/opt/maw-board/bin/sshx-server --listen 127.0.0.1 --port 8051 --static-dir /opt/maw-board/app/build
+Restart=on-failure
+RestartSec=2s
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/maw-board /var/lib/maw-board
+
+[Install]
+WantedBy=multi-user.target

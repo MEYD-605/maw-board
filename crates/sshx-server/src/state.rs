@@ -61,9 +61,7 @@ impl ServerState {
         let oracle_url_file = options
             .oracle_url_file
             .unwrap_or_else(|| "/root/.sshx-oracle-url.txt".to_string());
-        let static_dir = options
-            .static_dir
-            .unwrap_or_else(|| "build".to_string());
+        let static_dir = options.static_dir.unwrap_or_else(|| "build".to_string());
         Ok(Self {
             mac: Hmac::new_from_slice(secret.as_bytes()).unwrap(),
             override_origin: options.override_origin,

@@ -392,7 +392,9 @@
         />
       {:else}
         <button
-          class="term-title w-full truncate {label ? 'text-indigo-300' : 'text-zinc-300'} hover:text-white"
+          class="term-title w-full truncate {label
+            ? 'text-indigo-300'
+            : 'text-zinc-300'} hover:text-white"
           title={canRename ? "Click to rename" : currentTitle}
           on:click={startRename}
         >

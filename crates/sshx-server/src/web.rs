@@ -24,8 +24,8 @@ use tower_http::set_header::SetResponseHeaderLayer;
 
 use crate::ServerState;
 
-pub mod protocol;
 mod pages;
+pub mod protocol;
 mod socket;
 
 /// Returns the web application server, routed with Axum.
@@ -70,25 +70,104 @@ pub fn app(state: &ServerState) -> Router<Arc<ServerState>> {
         )
 }
 
-async fn go_redirect(State(state): State<Arc<ServerState>>) -> Response {
+#[derive(Deserialize)]
+struct GoParams {
+    session: Option<usize>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct GoSessionLink {
+    label: String,
+    url: String,
+}
+
+async fn go_redirect(
+    State(state): State<Arc<ServerState>>,
+    Query(params): Query<GoParams>,
+) -> Response {
     match tokio::fs::read_to_string(state.oracle_url_file()).await {
         Ok(contents) => {
-            let url = contents.trim();
-            if url.is_empty() {
-                (StatusCode::SERVICE_UNAVAILABLE, "no active session").into_response()
-            } else {
-                // Wrap the live session in a full-page iframe so the browser
-                // address bar stays at `/go` (the session id + encryption key
-                // stay hidden inside the frame instead of redirecting the bar).
-                let html = pages::go_iframe_page(url);
-                (
-                    [(http::header::CONTENT_TYPE, "text/html; charset=utf-8")],
-                    html,
-                )
-                    .into_response()
+            let sessions = parse_oracle_sessions(&contents);
+            match (sessions.len(), params.session) {
+                (0, _) => (StatusCode::SERVICE_UNAVAILABLE, "no active session").into_response(),
+                (1, None) | (1, Some(0)) => go_iframe_response(&sessions[0].url),
+                (_, Some(index)) => sessions.get(index).map_or_else(
+                    || (StatusCode::NOT_FOUND, "session not found").into_response(),
+                    |session| go_iframe_response(&session.url),
+                ),
+                _ => {
+                    let html = pages::go_picker_page(&sessions);
+                    (
+                        [(http::header::CONTENT_TYPE, "text/html; charset=utf-8")],
+                        html,
+                    )
+                        .into_response()
+                }
             }
         }
         Err(_) => (StatusCode::SERVICE_UNAVAILABLE, "no active session").into_response(),
+    }
+}
+
+fn go_iframe_response(url: &str) -> Response {
+    // Wrap the live session in a full-page iframe so the browser address bar
+    // stays at `/go` (the session id + encryption key stay hidden inside the
+    // frame instead of redirecting the bar).
+    let html = pages::go_iframe_page(url);
+    (
+        [(http::header::CONTENT_TYPE, "text/html; charset=utf-8")],
+        html,
+    )
+        .into_response()
+}
+
+fn parse_oracle_sessions(contents: &str) -> Vec<GoSessionLink> {
+    contents
+        .lines()
+        .filter_map(|line| parse_oracle_session_line(line.trim()))
+        .enumerate()
+        .map(|(index, mut session)| {
+            if session.label.is_empty() {
+                session.label = session_label_from_url(&session.url)
+                    .unwrap_or_else(|| format!("Session {}", index + 1));
+            }
+            session
+        })
+        .collect()
+}
+
+fn parse_oracle_session_line(line: &str) -> Option<GoSessionLink> {
+    if line.is_empty() {
+        return None;
+    }
+
+    let (label, url) = if let Some((label, url)) = line.split_once('\t') {
+        (label.trim(), url.trim())
+    } else {
+        ("", line)
+    };
+
+    if url.is_empty() {
+        None
+    } else {
+        Some(GoSessionLink {
+            label: label.to_string(),
+            url: url.to_string(),
+        })
+    }
+}
+
+fn session_label_from_url(url: &str) -> Option<String> {
+    let after_session = url.split_once("/s/")?.1;
+    let name = after_session
+        .split(['?', '#'])
+        .next()
+        .unwrap_or("")
+        .trim_matches('/');
+    if name.is_empty() {
+        None
+    } else {
+        Some(name.to_string())
     }
 }
 
@@ -223,7 +302,8 @@ fn redirect_response(location: &str, cookie: Option<&str>) -> Response {
     response.headers_mut().insert(header::LOCATION, location);
     if let Some(cookie) = cookie {
         let set_cookie = format!(
-            "{BOARD_AUTH_COOKIE}={cookie}; Max-Age={BOARD_AUTH_TTL_SECS}; Path=/; HttpOnly; Secure; SameSite=Lax"
+            "{BOARD_AUTH_COOKIE}={cookie}; Max-Age={BOARD_AUTH_TTL_SECS}; Path=/; HttpOnly; \
+             Secure; SameSite=Lax"
         );
         if let Some(value) = header_value(&set_cookie) {
             response.headers_mut().append(header::SET_COOKIE, value);
@@ -344,11 +424,19 @@ fn percent_encode_query(value: &str) -> String {
 }
 
 pub(crate) fn escape_html_attr(value: &str) -> String {
+    escape_html(value, true)
+}
+
+pub(crate) fn escape_html_text(value: &str) -> String {
+    escape_html(value, false)
+}
+
+fn escape_html(value: &str, escape_quotes: bool) -> String {
     let mut out = String::with_capacity(value.len());
     for ch in value.chars() {
         match ch {
             '&' => out.push_str("&amp;"),
-            '"' => out.push_str("&quot;"),
+            '"' if escape_quotes => out.push_str("&quot;"),
             '<' => out.push_str("&lt;"),
             '>' => out.push_str("&gt;"),
             _ => out.push(ch),
@@ -422,7 +510,8 @@ async fn list_files(Query(params): Query<HashMap<String, String>>) -> Response {
     let Some(dir) = safe_join(rel) else {
         return (StatusCode::BAD_REQUEST, "invalid path").into_response();
     };
-    // Resolve symlinks and confirm we stayed inside FILES_ROOT (see confine_to_root).
+    // Resolve symlinks and confirm we stayed inside FILES_ROOT (see
+    // confine_to_root).
     let Some(dir) = confine_to_root(&dir).await else {
         return (StatusCode::NOT_FOUND, "not a directory").into_response();
     };
@@ -504,9 +593,10 @@ async fn read_file(Query(params): Query<HashMap<String, String>>) -> Response {
         return (StatusCode::FORBIDDEN, "restricted file").into_response();
     }
 
-    // Resolve symlinks and confirm we stayed inside FILES_ROOT (see confine_to_root).
-    // Without this, a symlink inside the workspace (public.txt -> /etc/passwd)
-    // escapes the root AND dodges the name-based denylist above.
+    // Resolve symlinks and confirm we stayed inside FILES_ROOT (see
+    // confine_to_root). Without this, a symlink inside the workspace
+    // (public.txt -> /etc/passwd) escapes the root AND dodges the name-based
+    // denylist above.
     let Some(path) = confine_to_root(&path).await else {
         return (StatusCode::NOT_FOUND, "file not found").into_response();
     };
@@ -628,4 +718,37 @@ async fn sysstat() -> Response {
         load,
     );
     ([(http::header::CONTENT_TYPE, "application/json")], body).into_response()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_single_oracle_url_compatibly() {
+        assert_eq!(
+            parse_oracle_sessions("https://host/s/alpha#secret\n"),
+            vec![GoSessionLink {
+                label: "alpha".to_string(),
+                url: "https://host/s/alpha#secret".to_string(),
+            }]
+        );
+    }
+
+    #[test]
+    fn parses_labeled_multi_session_oracle_urls() {
+        assert_eq!(
+            parse_oracle_sessions("Alpha board\thttps://host/s/a#k\nhttps://host/s/b#k\n"),
+            vec![
+                GoSessionLink {
+                    label: "Alpha board".to_string(),
+                    url: "https://host/s/a#k".to_string(),
+                },
+                GoSessionLink {
+                    label: "b".to_string(),
+                    url: "https://host/s/b#k".to_string(),
+                },
+            ]
+        );
+    }
 }

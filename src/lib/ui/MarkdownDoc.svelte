@@ -16,10 +16,7 @@
   let mode: "split" | "edit" | "preview" = "split";
 
   function escapeHtml(s: string): string {
-    return s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
   // Inline: code, bold, italic, links (http/https only).
@@ -100,17 +97,20 @@
         class="mode"
         class:on={mode === "edit"}
         title="Edit only"
-        on:click={() => (mode = "edit")}><Edit2Icon size="13" /></button>
+        on:click={() => (mode = "edit")}><Edit2Icon size="13" /></button
+      >
       <button
         class="mode"
         class:on={mode === "split"}
         title="Split"
-        on:click={() => (mode = "split")}>◧</button>
+        on:click={() => (mode = "split")}>◧</button
+      >
       <button
         class="mode"
         class:on={mode === "preview"}
         title="Preview only"
-        on:click={() => (mode = "preview")}><EyeIcon size="13" /></button>
+        on:click={() => (mode = "preview")}><EyeIcon size="13" /></button
+      >
       <button class="close" title="Close" on:click={() => dispatch("close")}>
         <XIcon size="15" />
       </button>

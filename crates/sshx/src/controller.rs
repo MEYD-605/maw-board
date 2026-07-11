@@ -118,7 +118,10 @@ impl Controller {
     /// new TCP handshake.
     async fn connect(origin: &str) -> Result<SshxServiceClient<Channel>, tonic::transport::Error> {
         let endpoint = tonic::transport::Endpoint::from_shared(String::from(origin))?
-            .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            .user_agent(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) \
+                 Chrome/120.0.0.0 Safari/537.36",
+            )
             .expect("invalid user agent");
         SshxServiceClient::connect(endpoint).await
     }

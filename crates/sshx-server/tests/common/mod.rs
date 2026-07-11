@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, HashMap};
 use std::net::SocketAddr;
-use std::sync::Arc;
+use std::path::{Path, PathBuf};
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
 use anyhow::{ensure, Result};
@@ -17,6 +18,24 @@ use sshx_server::{
 };
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time;
+
+static TEST_FILES_ROOT: OnceLock<PathBuf> = OnceLock::new();
+
+/// Return the process-wide hermetic files root used by server tests.
+///
+/// The production server reads `MAW_FILES_ROOT` at request time, so tests must
+/// not mutate that environment variable per test while Tokio runs tests in
+/// parallel. Instead, initialize it once before any test server starts.
+pub fn test_files_root() -> &'static Path {
+    TEST_FILES_ROOT.get_or_init(|| {
+        let root =
+            std::env::temp_dir().join(format!("sshx-server-test-files-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).expect("create hermetic MAW_FILES_ROOT for tests");
+        std::env::set_var("MAW_FILES_ROOT", &root);
+        root
+    })
+}
 use tokio_tungstenite::{tungstenite::Message, MaybeTlsStream, WebSocketStream};
 use tonic::transport::Channel;
 
@@ -37,6 +56,8 @@ impl TestServer {
 
     /// Create a fresh test server with explicit server options.
     pub async fn new_with_options(options: ServerOptions) -> Self {
+        test_files_root();
+
         let listener = TcpListener::bind("[::1]:0").await.unwrap();
         let local_addr = listener.local_addr().unwrap();
 

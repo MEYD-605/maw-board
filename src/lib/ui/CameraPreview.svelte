@@ -17,8 +17,7 @@
 
   // Window geometry (px). Default: stack down the top-right corner.
   let x =
-    (typeof window !== "undefined" ? window.innerWidth - 320 : 40) -
-    index * 24;
+    (typeof window !== "undefined" ? window.innerWidth - 320 : 40) - index * 24;
   let y = 84 + index * 232;
   let w = 288;
   let h = 216;
@@ -47,7 +46,7 @@
       x = Math.max(0, Math.min(window.innerWidth - 40, e.clientX - ox));
       y = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - oy));
     }
-    function onUp(e: PointerEvent) {
+    function onUp() {
       target.releasePointerCapture(event.pointerId);
       target.removeEventListener("pointermove", onMove);
       target.removeEventListener("pointerup", onUp);
@@ -90,7 +89,11 @@
       <span>{label}</span>
     </div>
     {#if closable}
-      <button class="cam-close" title="Turn camera off" on:click={() => dispatch("close")}>
+      <button
+        class="cam-close"
+        title="Turn camera off"
+        on:click={() => dispatch("close")}
+      >
         <XIcon size="14" />
       </button>
     {/if}
@@ -136,6 +139,10 @@
   .cam-resize {
     @apply absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize;
     touch-action: none;
-    background: linear-gradient(135deg, transparent 50%, rgb(113 113 122 / 0.8) 50%);
+    background: linear-gradient(
+      135deg,
+      transparent 50%,
+      rgb(113 113 122 / 0.8) 50%
+    );
   }
 </style>

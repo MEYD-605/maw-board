@@ -1,8 +1,8 @@
 # APK Packaging — Oracle Board (TWA)
 
-Wrap the Oracle Board PWA as a native Android `.apk` using Trusted Web Activity (TWA).
-The app is a thin shell that opens `ssh.example.com/go` in a Chrome Custom Tab with
-no browser chrome — it looks and feels like a native app.
+Wrap the Oracle Board PWA as a native Android `.apk` using Trusted Web Activity
+(TWA). The app is a thin shell that opens `ssh.example.com/go` in a Chrome
+Custom Tab with no browser chrome — it looks and feels like a native app.
 
 ## Prerequisites
 
@@ -16,7 +16,9 @@ no browser chrome — it looks and feels like a native app.
 2. Enter `https://ssh.example.com`
 3. Click **"Package for stores"** → **Android**
 4. Configure:
-   - Package name: `com.example.oracleboard`
+   - Package name: your real Android application ID, for example
+     `com.yourcompany.oracleboard` (do not ship the placeholder
+     `com.example.oracleboard`)
    - App name: `Oracle Board`
    - Launcher name: `Oracle Board`
    - Theme color: `#0e0e10`
@@ -34,7 +36,7 @@ npm i -g @nicolo-ribaudo/bubblewrap
 
 bubblewrap init --manifest="https://ssh.example.com/manifest.webmanifest"
 # Edit twa-manifest.json:
-#   packageId: com.example.oracleboard
+#   packageId: your real Android application ID, e.g. com.yourcompany.oracleboard
 #   host: ssh.example.com
 #   startUrl: /go
 #   themeColor: #0e0e10
@@ -49,23 +51,42 @@ bubblewrap build
 For the TWA to open full-screen (no browser bar), Chrome verifies ownership via
 `/.well-known/assetlinks.json` on the host domain.
 
-### 1. Get your signing key fingerprint
+### 1. Collect the real Android values
+
+Do not invent or reuse placeholder values. The deployed
+`static/.well-known/assetlinks.json` needs both of these production values:
+
+- `package_name`: the real Android application ID used in PWABuilder or
+  `twa-manifest.json` (for example `com.yourcompany.oracleboard`, not
+  `com.example.oracleboard`).
+- `sha256_cert_fingerprints`: the SHA-256 certificate fingerprint for the exact
+  signing key used to sign the APK/AAB distributed to users.
+
+Get the fingerprint from your signing keystore:
 
 ```bash
-keytool -list -v -keystore your-keystore.jks -alias your-alias | grep SHA256
+keytool -list -v -keystore /path/to/release-keystore.jks -alias release-alias \
+  | grep 'SHA256:'
 ```
+
+If Play App Signing is enabled, use the Play Console **App signing key
+certificate** SHA-256 fingerprint for store builds, not the local upload key.
 
 ### 2. Create the file
 
+Replace both placeholders below with the real values collected above:
+
 ```json
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.example.oracleboard",
-    "sha256_cert_fingerprints": ["YOUR:SHA256:FINGERPRINT:HERE"]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.yourcompany.oracleboard",
+      "sha256_cert_fingerprints": ["AA:BB:CC:...:REAL:SIGNING:SHA256"]
+    }
   }
-}]
+]
 ```
 
 ### 3. Deploy
@@ -96,6 +117,7 @@ adb shell am start -a android.intent.action.VIEW \
 
 Use the `.aab` (Android App Bundle) for Play Store upload. The `.apk` is for
 direct sideloading / testing. Play Store requires:
+
 - Screenshots (phone + tablet)
 - Privacy policy URL
 - Content rating questionnaire
@@ -104,6 +126,8 @@ direct sideloading / testing. Play Store requires:
 ## Notes
 
 - TWA requires Chrome 72+ on the device (covers 99%+ of Android)
-- If asset links aren't verified, the app falls back to a Custom Tab (shows URL bar)
-- Updates are automatic — the TWA always loads the latest web content from the server
+- If asset links aren't verified, the app falls back to a Custom Tab (shows URL
+  bar)
+- Updates are automatic — the TWA always loads the latest web content from the
+  server
 - Offline support comes from the service worker (`sw.js`)
