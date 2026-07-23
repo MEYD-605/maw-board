@@ -238,6 +238,7 @@
   // Remote audio elements keyed by peer UID.
   let remoteAudios: Record<number, HTMLAudioElement> = {};
   let remoteVideos: Record<number, MediaStream> = {}; // live remote camera streams
+  let peerIceStates: Record<number, string> = {}; // ICE state per remote uid
   let stream: StreamController | null = null;
   let streamActive = false;
   let myStreamId: string | null = null;
@@ -315,12 +316,27 @@
               } else if (track.kind === "video") {
                 // Remote camera — render the live MediaStream directly into a
                 // <video> element (smooth WebRTC video, no JPEG snapshotting).
-                const stream = streams[0] ?? new MediaStream([track]);
+                // Prefer streams[0]; if empty, wrap track so <video> always has a stream.
+                let stream = streams[0];
+                if (!stream) {
+                  stream = new MediaStream([track]);
+                } else if (!stream.getVideoTracks().includes(track)) {
+                  // Some browsers deliver track outside streams[0] — ensure it's on the stream we bind.
+                  try { stream.addTrack(track); } catch { /* already there */ }
+                }
                 remoteVideos = { ...remoteVideos, [uid]: stream };
                 track.addEventListener("ended", () => {
                   const { [uid]: _gone, ...rest } = remoteVideos;
                   remoteVideos = rest;
                 });
+              }
+            },
+            undefined,
+            (uid, state) => {
+              peerIceStates = { ...peerIceStates, [uid]: state };
+              if (state === "closed" || state === "disconnected") {
+                const { [uid]: _s, ...rest } = peerIceStates;
+                peerIceStates = rest;
               }
             },
           );
@@ -442,6 +458,8 @@
         rtcMesh = null;
         for (const audio of Object.values(remoteAudios)) audio.pause();
         remoteAudios = {};
+        remoteVideos = {};
+        peerIceStates = {};
       },
 
       onClose(event) {
@@ -1407,6 +1425,27 @@
     }
   }
 
+
+  function peerIceLabel(state: string | undefined): string {
+    if (!state) return "connecting…";
+    switch (state) {
+      case "new":
+      case "checking":
+        return "connecting…";
+      case "connected":
+      case "completed":
+        return "";
+      case "disconnected":
+        return "reconnecting…";
+      case "failed":
+        return "ICE failed — check network/TURN";
+      case "closed":
+        return "closed";
+      default:
+        return state;
+    }
+  }
+
   // Camera toggle: getUserMedia video → WebRTC mesh (P2P video tiles).
   async function handleCamera() {
     if (cameraActive && cameraStream) {
@@ -2131,6 +2170,7 @@
       mirror={false}
       closable={false}
       index={i + (cameraActive ? 1 : 0)}
+      status={peerIceLabel(peerIceStates[Number(uid)])}
     />
   {/each}
 
