@@ -23,19 +23,11 @@
   const socials = [
     {
       title: "🤖\xa0 GitHub",
-      href: "https://github.com/ekzhang/sshx",
+      href: "https://github.com/MEYD-605/maw-board",
     },
     {
-      title: "🌸\xa0 Twitter",
-      href: "https://twitter.com/ekzhang1",
-    },
-    {
-      title: "💌\xa0 Email",
-      href: "mailto:ekzhang1@gmail.com",
-    },
-    {
-      title: "🌎\xa0 Website",
-      href: "https://www.ekzhang.com",
+      title: "📦\xa0 Plugin",
+      href: "https://github.com/MEYD-605/maw-workboard",
     },
   ];
 
@@ -48,13 +40,16 @@
   class="max-w-screen-xl mx-auto px-4 md:px-8 lg:px-16 text-zinc-100 overflow-x-hidden"
 >
   <header class="mt-6 mb-4 sm:my-8 md:my-12">
-    <img class="h-12 sm:h-16 -mx-1" src={logotypeDark} alt="sshx logo" />
+    <img class="h-12 sm:h-16 -mx-1" src={logotypeDark} alt="Oracle Board logo" />
+    <p class="mt-3 text-sm sm:text-base text-zinc-400 font-medium tracking-wide">
+      Oracle Board · MEYD-605
+    </p>
   </header>
   <h1
     class="font-medium text-3xl sm:text-4xl md:text-5xl max-w-[26ch] py-2 mb-6 md:mb-0 sm:tracking-tight leading-[1.15]"
   >
-    A secure web-based,
-    <span class="title-gradient">collaborative</span> terminal
+    Oracle Board —
+    <span class="title-gradient">collaborative</span> terminal + workboard
   </h1>
 
   <div class="relative">
@@ -69,25 +64,25 @@
         width={813}
         height={623}
         src={landingGraphic}
-        alt="two terminal windows running sshx and three live cursors"
+        alt="Oracle Board collaborative terminals and live cursors"
       />
     </div>
   </div>
 
   <section class="my-12 space-y-6 sm:text-lg md:max-w-[460px] text-zinc-400">
     <p>
-      <code class="name">sshx</code> lets you share your terminal with anyone by
-      link, on a
-      <b>multiplayer infinite canvas</b>.
+      <code class="name">Oracle Board</code> is the MEYD collaborative terminal
+      and workboard — multiplayer canvas, files, sysstat, password gate — run via
+      <code class="name">maw board</code>.
     </p>
     <p>
-      It has <b>real-time collaboration</b>, with remote cursors and chat. It's
-      also <b>fast</b> and <b>end-to-end encrypted</b>, with a lightweight
-      server written in Rust.
+      Real-time collaboration, remote cursors, and end-to-end encryption on a
+      lightweight Rust server. Derived from open-source <code class="name">sshx</code>
+      (see NOTICE / LICENSE).
     </p>
     <p>
-      Install <code class="name">sshx</code> with a single command. Use it for teaching,
-      debugging, or cloud access.
+      Install the workboard plugin, then open with <code class="name">maw board</code>.
+      Use it for fleet ops, teaching, debugging, and house agent terminals.
     </p>
   </section>
 
@@ -165,69 +160,23 @@
       macOS / Linux
     </h3>
     <div class="text-sm text-zinc-400 md:text-base md:pt-0.5">
-      <p class="mb-3">Run the following in your terminal:</p>
-      <CopyableCode value="curl -sSf https://sshx.io/get | sh" />
-
-      <p class="mt-8 mb-3">Or, download the binary for your platform.</p>
-      <div class="flex flex-wrap gap-2 mb-2">
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-aarch64-apple-darwin.tar.gz"
-          >macOS ARM64 (Apple Silicon)</DownloadLink
+      <p class="mb-3">Install the maw plugin, then the prebuilt workboard runtime:</p>
+      <CopyableCode value="maw plugin install MEYD-605/maw-workboard" />
+      <p class="mt-4 mb-3">Prebuilt bundles (Linux / macOS) from MEYD releases:</p>
+      <CopyableCode
+        value="maw board install --prebuilt ./workboard-prebuilt-<os>.tar.gz"
+      />
+      <p class="mt-4 mb-3">
+        Release assets:
+        <a
+          class="underline text-zinc-200"
+          href="https://github.com/MEYD-605/maw-ssh/releases/tag/workboard-v0.1.0"
+          target="_blank"
+          rel="noreferrer">workboard-v0.1.0</a
         >
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-x86_64-apple-darwin.tar.gz"
-          >macOS x86-64 (Intel)</DownloadLink
-        >
-      </div>
-      <div class="flex flex-wrap gap-2 mb-2">
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-aarch64-unknown-linux-musl.tar.gz"
-          >Linux ARM64</DownloadLink
-        >
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-x86_64-unknown-linux-musl.tar.gz"
-          >Linux x86-64</DownloadLink
-        >
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-arm-unknown-linux-musleabihf.tar.gz"
-          >Linux ARMv6</DownloadLink
-        >
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-armv7-unknown-linux-musleabihf.tar.gz"
-          >Linux ARMv7</DownloadLink
-        >
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-x86_64-unknown-freebsd.tar.gz"
-          >FreeBSD x86-64</DownloadLink
-        >
-      </div>
-    </div>
-  </section>
-
-  <section class="installation-section">
-    <h3 class="text-xl sm:text-lg">
-      <DownloadIcon size="20" class="text-zinc-400 inline-block mr-1 mb-0.5" />
-      Windows
-    </h3>
-    <div class="text-sm text-zinc-400 md:text-base md:pt-0.5">
-      <p class="mb-3">Download the executable for your platform.</p>
-
-      <div class="flex flex-wrap gap-2">
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-x86_64-pc-windows-msvc.zip"
-          >Windows x86-64</DownloadLink
-        >
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-i686-pc-windows-msvc.zip"
-          >Windows x86</DownloadLink
-        >
-        <DownloadLink
-          href="https://sshx.s3.amazonaws.com/sshx-aarch64-pc-windows-msvc.zip"
-          >Windows ARM64</DownloadLink
-        >
-      </div>
+      </p>
+      <CopyableCode value="maw board serve" />
+      <p class="mt-3">Then open <code class="name">http://127.0.0.1:3457/go</code></p>
     </div>
   </section>
 
@@ -238,24 +187,26 @@
     </h3>
     <div class="text-sm text-zinc-400 md:text-base md:pt-0.5">
       <p class="mb-3">
-        Ensure you have up-to-date versions of Rust and protoc. Compile sshx and
-        add it to the system path.
+        Clone <code class="name">MEYD-605/maw-board</code>, install Rust + protoc +
+        Bun, then build and install via the workboard plugin.
       </p>
-      <CopyableCode value="cargo install sshx" />
+      <CopyableCode
+        value="git clone https://github.com/MEYD-605/maw-board && maw board install --source ./maw-board"
+      />
     </div>
   </section>
 
   <section class="installation-section">
     <h3 class="text-xl sm:text-lg">
       <GitBranchIcon size="20" class="text-zinc-400 inline-block mr-1 mb-0.5" />
-      GitHub Actions
+      Friend house
     </h3>
     <div class="text-sm text-zinc-400 md:text-base md:pt-0.5">
       <p class="mb-3">
-        On GitHub Actions or other CI providers, run this command. It pauses
-        your workflow and starts a collaborative session.
+        Board + oracle-menu pack notes live in
+        <code class="name">maw-workboard</code> templates (friend-house pack).
+        Product name to search: <b>Oracle Board</b> — not bare “sshx”.
       </p>
-      <CopyableCode value="curl -sSf https://sshx.io/get | sh -s run" />
     </div>
   </section>
 
@@ -275,7 +226,8 @@
   </div>
 
   <p class="mb-12 text-center text-zinc-400">
-    open source, &copy; Eric Zhang 2023
+    Oracle Board · MEYD-605 · open source (MIT) · derived from sshx by Eric Zhang —
+    see NOTICE
   </p>
 </main>
 

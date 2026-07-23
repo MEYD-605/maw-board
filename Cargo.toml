@@ -4,12 +4,15 @@ resolver = "2"
 
 [workspace.package]
 version = "0.4.1"
-authors = ["Eric Zhang <ekzhang1@gmail.com>"]
+authors = [
+    "MEYD-605 <ai.no.1bro@gmail.com>",
+    "Eric Zhang <ekzhang1@gmail.com>", # upstream sshx
+]
 license = "MIT"
-description = "A secure web-based, collaborative terminal."
-repository = "https://github.com/ekzhang/sshx"
-documentation = "https://sshx.io"
-keywords = ["ssh", "share", "terminal", "collaborative"]
+description = "Oracle Board — collaborative terminal + workboard (MEYD; derived from sshx)."
+repository = "https://github.com/MEYD-605/maw-board"
+documentation = "https://github.com/MEYD-605/maw-board#readme"
+keywords = ["oracle", "board", "terminal", "collaborative", "maw"]
 
 [workspace.dependencies]
 anyhow = "1.0.62"

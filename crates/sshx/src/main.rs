@@ -7,12 +7,13 @@ use sshx::{controller::Controller, runner::Runner, terminal::get_default_shell};
 use tokio::signal;
 use tracing::error;
 
-/// A secure web-based, collaborative terminal.
+/// Oracle Board client — collaborative terminal (MEYD; derived from sshx).
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
-    /// Address of the remote sshx server.
-    #[clap(long, default_value = "https://sshx.io", env = "SSHX_SERVER")]
+    /// Address of the Oracle Board / sshx-compatible server.
+    /// Default targets local workboard sidecar (maw board :3457).
+    #[clap(long, default_value = "http://127.0.0.1:3457", env = "SSHX_SERVER")]
     server: String,
 
     /// Local shell command to run in the terminal.

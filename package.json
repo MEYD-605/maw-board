@@ -1,6 +1,7 @@
 {
-  "name": "sshx",
+  "name": "oracle-board",
   "private": true,
+  "description": "Oracle Board web UI (MEYD-605/maw-board)",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
