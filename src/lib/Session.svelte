@@ -309,10 +309,10 @@
             (target, payload) => srocket?.send({ signal: [target, payload] }),
             (uid, track, streams) => {
               if (track.kind === "audio") {
-                const audio = new Audio();
-                audio.srcObject = new MediaStream([track]);
-                audio.play().catch(() => {});
-                remoteAudios[uid] = audio;
+                // Remote mic — must attach a real <audio> in the DOM.
+                // Detached `new Audio()` is frequently autoplay-blocked, so
+                // peers hear silence even when ICE/video already works.
+                attachRemoteAudio(uid, track);
               } else if (track.kind === "video") {
                 // Remote camera — render the live MediaStream directly into a
                 // <video> element (smooth WebRTC video, no JPEG snapshotting).
@@ -370,8 +370,19 @@
             rtcMesh?.addPeer(id);
           } else {
             rtcMesh?.removePeer(id);
-            remoteAudios[id]?.pause();
-            delete remoteAudios[id];
+            {
+              const a = remoteAudios[id];
+              if (a) {
+                try {
+                  a.pause();
+                  a.srcObject = null;
+                  a.remove();
+                } catch {
+                  /* ignore */
+                }
+                delete remoteAudios[id];
+              }
+            }
             const { [id]: _goneVideo, ...restVideos } = remoteVideos;
             remoteVideos = restVideos;
           }
@@ -456,7 +467,15 @@
         shellLatencies = [];
         rtcMesh?.dispose();
         rtcMesh = null;
-        for (const audio of Object.values(remoteAudios)) audio.pause();
+        for (const audio of Object.values(remoteAudios)) {
+          try {
+            audio.pause();
+            audio.srcObject = null;
+            audio.remove();
+          } catch {
+            /* ignore */
+          }
+        }
         remoteAudios = {};
         remoteVideos = {};
         peerIceStates = {};
@@ -964,7 +983,86 @@
 
   // ── maw share workboard handlers ──
 
+
+  /** Ensure remote peer audio is audible (DOM element + unlock autoplay). */
+  function attachRemoteAudio(uid: number, track: MediaStreamTrack) {
+    // Drop prior element for this peer (renegotiate / replace track).
+    const prev = remoteAudios[uid];
+    if (prev) {
+      try {
+        prev.pause();
+        prev.srcObject = null;
+        prev.remove();
+      } catch {
+        /* ignore */
+      }
+      delete remoteAudios[uid];
+    }
+
+    const audio = document.createElement("audio");
+    audio.autoplay = true;
+    audio.setAttribute("playsinline", "true");
+    audio.setAttribute("data-peer-uid", String(uid));
+    audio.style.display = "none";
+    audio.volume = 1;
+    audio.muted = false;
+    audio.srcObject = new MediaStream([track]);
+    document.body.appendChild(audio);
+    remoteAudios[uid] = audio;
+
+    const tryPlay = () => {
+      audio.muted = false;
+      audio.volume = 1;
+      return audio.play().catch((err) => {
+        console.warn("[rtc] remote audio play blocked", uid, err);
+        // One toast per session max — unlock on next click.
+        if (!audioUnlockArmed) {
+          audioUnlockArmed = true;
+          makeToast({
+            kind: "info",
+            message: "Click once to enable peer audio",
+          });
+          const unlock = () => {
+            void resumeAllRemoteAudio();
+            window.removeEventListener("pointerdown", unlock, true);
+            window.removeEventListener("keydown", unlock, true);
+          };
+          window.addEventListener("pointerdown", unlock, true);
+          window.addEventListener("keydown", unlock, true);
+        }
+      });
+    };
+
+    tryPlay();
+    track.addEventListener("unmute", () => void tryPlay());
+    track.addEventListener("ended", () => {
+      try {
+        audio.pause();
+        audio.srcObject = null;
+        audio.remove();
+      } catch {
+        /* ignore */
+      }
+      delete remoteAudios[uid];
+    });
+  }
+
+  let audioUnlockArmed = false;
+
+  async function resumeAllRemoteAudio() {
+    for (const audio of Object.values(remoteAudios)) {
+      try {
+        audio.muted = false;
+        audio.volume = 1;
+        await audio.play();
+      } catch {
+        /* still blocked */
+      }
+    }
+  }
+
   // Mic toggle: add/remove audio track from WebRTC mesh (P2P, low latency).
+
   // Falls back to WS Voice relay if no peers connected yet.
   async function handleMicDown() {
     if (micRecording && micStream) {
@@ -978,11 +1076,21 @@
       return;
     }
     try {
-      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
       for (const track of micStream.getAudioTracks()) {
+        track.enabled = true;
         rtcMesh?.addTrack(track);
       }
       micRecording = true;
+      // Unlock outbound + inbound audio with the same user gesture that
+      // toggled the mic (autoplay policies require a gesture).
+      void resumeAllRemoteAudio();
     } catch {
       makeToast({ kind: "error", message: "Microphone blocked." });
     }
@@ -1979,7 +2087,15 @@
     touchZoom?.destroy();
     micStream?.getTracks().forEach((t) => t.stop());
     cameraStream?.getTracks().forEach((t) => t.stop());
-    for (const audio of Object.values(remoteAudios)) audio.pause();
+    for (const audio of Object.values(remoteAudios)) {
+      try {
+        audio.pause();
+        audio.srcObject = null;
+        audio.remove();
+      } catch {
+        /* ignore */
+      }
+    }
     for (const url of Object.values(streamSrcs)) URL.revokeObjectURL(url);
     // Drop the board-color we painted on the document so SPA nav back to the
     // landing page doesn't inherit it (falls back to the stylesheet).
