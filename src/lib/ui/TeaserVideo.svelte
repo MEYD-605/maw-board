@@ -19,8 +19,8 @@
     </div>
     <div class="flex ml-2">
       <div class="rounded-t-lg bg-zinc-800 h-7 w-44 px-2 flex items-center">
-        <img src={logo} alt="sshx logo" class="h-5 w-5" />
-        <p class="ml-1.5 text-xs">sshx</p>
+        <img src={logo} alt="Oracle Board logo" class="h-5 w-5" />
+        <p class="ml-1.5 text-xs">Oracle Board</p>
         <XIcon class="w-3.5 h-3.5 ml-auto text-zinc-400" />
       </div>
     </div>
@@ -33,7 +33,7 @@
     <div class="rounded-full flex-1 bg-zinc-900/60 flex items-center px-2">
       <InfoIcon class="w-4 h-4 text-zinc-400" />
       <p class="text-sm ml-2 select-none text-zinc-300">
-        sshx.io/s/gzN0WHsm6r#tiOAVOLsNXEZxJ
+        lab.clubsxai.com/go
       </p>
     </div>
     <div class="flex items-center gap-3 px-2">

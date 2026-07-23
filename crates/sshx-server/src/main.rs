@@ -9,7 +9,7 @@ use sshx_server::{Server, ServerOptions};
 use tokio::signal::unix::{signal, SignalKind};
 use tracing::{error, info};
 
-/// The sshx server CLI interface.
+/// Oracle Board server CLI (MEYD workboard sidecar; derived from sshx-server).
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {

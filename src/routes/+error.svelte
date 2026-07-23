@@ -5,7 +5,8 @@
 </script>
 
 <main class="p-4 max-w-xl mx-auto my-6 md:my-12 lg:my-24">
-  <img class="h-16 -mx-2" src={logotypeDark} alt="sshx logo" />
+  <img class="h-16 -mx-2" src={logotypeDark} alt="Oracle Board logo" />
+  <p class="mt-2 text-sm text-zinc-400 font-medium">Oracle Board</p>
 
   <div class="space-y-4 mt-6 mb-8 text-zinc-300">
     <p>
@@ -21,10 +22,12 @@
 </pre>
     {/if}
     <p>
-      Perhaps try coming back later? If you have any feedback, please feel free
-      to reach out at
-      <a class="underline text-white" href="mailto:ekzhang1@gmail.com"
-        >ekzhang1@gmail.com</a
+      Try again later, or open an issue on
+      <a
+        class="underline text-white"
+        href="https://github.com/MEYD-605/maw-board"
+        target="_blank"
+        rel="noreferrer">MEYD-605/maw-board</a
       >.
     </p>
   </div>
