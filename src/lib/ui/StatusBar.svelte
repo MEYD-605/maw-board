@@ -50,13 +50,24 @@
 </script>
 
 {#if ok}
-  <div class="statusbar" title={`load ${load} · RAM ${gb(memUsedMb)}/${gb(memTotalMb)} GB`}>
-    <span class="metric"><span class="lbl">CPU</span><span class={level(cpu)}>{cpu}%</span></span>
+  <div
+    class="statusbar"
+    title={`load ${load} · RAM ${gb(memUsedMb)}/${gb(memTotalMb)} GB`}
+  >
+    <span class="metric"
+      ><span class="lbl">CPU</span><span class={level(cpu)}>{cpu}%</span></span
+    >
     <span class="sep">·</span>
-    <span class="metric"><span class="lbl">RAM</span><span class={level(memPct)}>{memPct}%</span></span>
+    <span class="metric"
+      ><span class="lbl">RAM</span><span class={level(memPct)}>{memPct}%</span
+      ></span
+    >
     {#if temp !== null}
       <span class="sep">·</span>
-      <span class="metric"><span class="lbl">TEMP</span><span class={level(temp)}>{temp}°</span></span>
+      <span class="metric"
+        ><span class="lbl">TEMP</span><span class={level(temp)}>{temp}°</span
+        ></span
+      >
     {/if}
   </div>
 {/if}

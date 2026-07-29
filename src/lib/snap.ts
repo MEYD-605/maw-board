@@ -55,7 +55,10 @@ export function computeSnap(
 
   const considerX = (movingEdge: number, target: number) => {
     const d = target - movingEdge;
-    if (Math.abs(d) <= threshold && (!hasX || Math.abs(d) < Math.abs(bestXDelta))) {
+    if (
+      Math.abs(d) <= threshold &&
+      (!hasX || Math.abs(d) < Math.abs(bestXDelta))
+    ) {
       hasX = true;
       bestXDelta = d;
       bestXGuide = target;
@@ -63,7 +66,10 @@ export function computeSnap(
   };
   const considerY = (movingEdge: number, target: number) => {
     const d = target - movingEdge;
-    if (Math.abs(d) <= threshold && (!hasY || Math.abs(d) < Math.abs(bestYDelta))) {
+    if (
+      Math.abs(d) <= threshold &&
+      (!hasY || Math.abs(d) < Math.abs(bestYDelta))
+    ) {
       hasY = true;
       bestYDelta = d;
       bestYGuide = target;
@@ -265,7 +271,12 @@ function segmentStart(total: number, index: number, segments: number) {
   return Math.floor((total * index) / segments);
 }
 
-function segmentSize(total: number, index: number, span: number, segments: number) {
+function segmentSize(
+  total: number,
+  index: number,
+  span: number,
+  segments: number,
+) {
   return (
     segmentStart(total, index + span, segments) -
     segmentStart(total, index, segments)
@@ -289,8 +300,14 @@ export function detectEdgeSnapAction(
   const edge = coarse ? 32 : 14;
   const corner = coarse ? 84 : 48;
   const strip = coarse
-    ? Math.min(180, Math.max(96, Math.floor(Math.min(viewport.w, viewport.h) * 0.22)))
-    : Math.min(132, Math.max(56, Math.floor(Math.min(viewport.w, viewport.h) * 0.18)));
+    ? Math.min(
+        180,
+        Math.max(96, Math.floor(Math.min(viewport.w, viewport.h) * 0.22)),
+      )
+    : Math.min(
+        132,
+        Math.max(56, Math.floor(Math.min(viewport.w, viewport.h) * 0.18)),
+      );
 
   const x = Math.max(0, Math.min(viewport.w, clientX));
   const y = Math.max(0, Math.min(viewport.h, clientY));
@@ -334,7 +351,10 @@ export function detectEdgeSnapAction(
   return null;
 }
 
-export function snapSharedEdges(action: SnapAction, view: ViewRect): SnapEdge[] {
+export function snapSharedEdges(
+  action: SnapAction,
+  view: ViewRect,
+): SnapEdge[] {
   const landscape = view.w >= view.h;
   switch (action) {
     case "leftHalf":

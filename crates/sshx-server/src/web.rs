@@ -24,8 +24,8 @@ use tower_http::set_header::SetResponseHeaderLayer;
 
 use crate::ServerState;
 
-pub mod protocol;
 mod pages;
+pub mod protocol;
 mod socket;
 
 /// Returns the web application server, routed with Axum.
@@ -223,7 +223,8 @@ fn redirect_response(location: &str, cookie: Option<&str>) -> Response {
     response.headers_mut().insert(header::LOCATION, location);
     if let Some(cookie) = cookie {
         let set_cookie = format!(
-            "{BOARD_AUTH_COOKIE}={cookie}; Max-Age={BOARD_AUTH_TTL_SECS}; Path=/; HttpOnly; Secure; SameSite=Lax"
+            "{BOARD_AUTH_COOKIE}={cookie}; Max-Age={BOARD_AUTH_TTL_SECS}; Path=/; HttpOnly; \
+             Secure; SameSite=Lax"
         );
         if let Some(value) = header_value(&set_cookie) {
             response.headers_mut().append(header::SET_COOKIE, value);
@@ -422,7 +423,8 @@ async fn list_files(Query(params): Query<HashMap<String, String>>) -> Response {
     let Some(dir) = safe_join(rel) else {
         return (StatusCode::BAD_REQUEST, "invalid path").into_response();
     };
-    // Resolve symlinks and confirm we stayed inside FILES_ROOT (see confine_to_root).
+    // Resolve symlinks and confirm we stayed inside FILES_ROOT (see
+    // confine_to_root).
     let Some(dir) = confine_to_root(&dir).await else {
         return (StatusCode::NOT_FOUND, "not a directory").into_response();
     };
@@ -504,9 +506,10 @@ async fn read_file(Query(params): Query<HashMap<String, String>>) -> Response {
         return (StatusCode::FORBIDDEN, "restricted file").into_response();
     }
 
-    // Resolve symlinks and confirm we stayed inside FILES_ROOT (see confine_to_root).
-    // Without this, a symlink inside the workspace (public.txt -> /etc/passwd)
-    // escapes the root AND dodges the name-based denylist above.
+    // Resolve symlinks and confirm we stayed inside FILES_ROOT (see
+    // confine_to_root). Without this, a symlink inside the workspace
+    // (public.txt -> /etc/passwd) escapes the root AND dodges the name-based
+    // denylist above.
     let Some(path) = confine_to_root(&path).await else {
         return (StatusCode::NOT_FOUND, "file not found").into_response();
     };

@@ -111,7 +111,8 @@
           bind:value={inputFontSize}
           on:input={() => updateSettings({ fontSize: Number(inputFontSize) })}
         />
-        <span class="text-sm text-zinc-300 w-8 text-right">{inputFontSize}</span>
+        <span class="text-sm text-zinc-300 w-8 text-right">{inputFontSize}</span
+        >
       </div>
     </div>
     <div class="item">

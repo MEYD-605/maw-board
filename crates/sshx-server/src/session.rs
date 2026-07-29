@@ -407,7 +407,8 @@ impl Session {
         Ok(())
     }
 
-    /// Return a snapshot of all current board items (sent to newly-joined clients).
+    /// Return a snapshot of all current board items (sent to newly-joined
+    /// clients).
     pub fn board_snapshot(&self) -> Vec<BoardItem> {
         self.board.lock().clone()
     }
@@ -457,7 +458,8 @@ impl Session {
         self.broadcast.send(WsServer::VoiceData(uid, data)).ok();
     }
 
-    /// Broadcast a screen-share frame to all clients (ephemeral — not persisted).
+    /// Broadcast a screen-share frame to all clients (ephemeral — not
+    /// persisted).
     pub fn send_stream_frame(&self, uid: Uid, stream_id: String, data: Bytes) {
         self.broadcast
             .send(WsServer::StreamFrame(uid, stream_id, data))

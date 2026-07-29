@@ -46,7 +46,8 @@ self.addEventListener("fetch", (event) => {
   // Anything else (navigations, /s/<id>, manifest, /api, websockets) goes
   // straight to the network so the SW can never return a non-Response.
   const cacheable =
-    url.pathname.startsWith("/_app/immutable/") || PRECACHE.includes(url.pathname);
+    url.pathname.startsWith("/_app/immutable/") ||
+    PRECACHE.includes(url.pathname);
   if (!cacheable) return;
 
   // Cache-first; on a cache miss fall through to the real network response

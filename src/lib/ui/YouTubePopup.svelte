@@ -65,7 +65,11 @@
             <Minimize2Icon size="14" />
           {/if}
         </button>
-        <button class="icon-btn" title="Close" on:click={() => dispatch("close")}>
+        <button
+          class="icon-btn"
+          title="Close"
+          on:click={() => dispatch("close")}
+        >
           <XIcon size="16" />
         </button>
       </div>

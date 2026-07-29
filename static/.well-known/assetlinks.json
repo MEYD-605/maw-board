@@ -1,8 +1,12 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.example.oracleboard",
-    "sha256_cert_fingerprints": ["TODO:REPLACE:WITH:ACTUAL:SIGNING:KEY:FINGERPRINT"]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.oracleboard",
+      "sha256_cert_fingerprints": [
+        "TODO:REPLACE:WITH:ACTUAL:SIGNING:KEY:FINGERPRINT"
+      ]
+    }
   }
-}]
+]

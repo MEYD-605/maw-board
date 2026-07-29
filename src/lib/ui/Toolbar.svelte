@@ -37,6 +37,7 @@
   export let micRecording = false;
   export let cameraActive = false;
   export let boardLocked = false;
+  // svelte-ignore unused-export-let
   export let lockedForMe = false;
   export let broadcastMode = false;
   export let numpadOpen = false;
@@ -113,191 +114,191 @@
       <div class="v-divider" />
 
       <div class="flex gap-1">
-      <button
-        class="icon-button"
-        on:click={() => dispatch("create")}
-        disabled={!connected || !hasWriteAccess}
-        title={!connected
-          ? "Not connected"
-          : hasWriteAccess === false // Only show the "No write access" title after confirming read-only mode.
-          ? "No write access"
-          : "Create new terminal"}
-      >
-        <PlusCircleIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <div class="relative">
         <button
           class="icon-button"
-          class:active={showTileMenu}
-          on:click={() => (showTileMenu = !showTileMenu)}
-          disabled={!connected || hasWriteAccess === false}
-          title="Arrange windows"
+          on:click={() => dispatch("create")}
+          disabled={!connected || !hasWriteAccess}
+          title={!connected
+            ? "Not connected"
+            : hasWriteAccess === false // Only show the "No write access" title after confirming read-only mode.
+            ? "No write access"
+            : "Create new terminal"}
         >
-          <GridIcon strokeWidth={1.5} class="p-0.5" />
+          <PlusCircleIcon strokeWidth={1.5} class="p-0.5" />
         </button>
-        {#if showTileMenu}
-          <LayoutMenu
-            on:select={(e) => dispatch("tile", e.detail)}
-            on:close={() => (showTileMenu = false)}
-          />
-        {/if}
+        <div class="relative">
+          <button
+            class="icon-button"
+            class:active={showTileMenu}
+            on:click={() => (showTileMenu = !showTileMenu)}
+            disabled={!connected || hasWriteAccess === false}
+            title="Arrange windows"
+          >
+            <GridIcon strokeWidth={1.5} class="p-0.5" />
+          </button>
+          {#if showTileMenu}
+            <LayoutMenu
+              on:select={(e) => dispatch("tile", e.detail)}
+              on:close={() => (showTileMenu = false)}
+            />
+          {/if}
+        </div>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("center")}
+          title="Center / reset view"
+        >
+          <CrosshairIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("clear")}
+          disabled={!connected || hasWriteAccess === false}
+          title="Clear the board (notes/images/videos)"
+        >
+          <Trash2Icon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          class:lock-on={boardLocked}
+          on:click={() => dispatch("lock")}
+          disabled={!connected || hasWriteAccess === false}
+          title={boardLocked
+            ? "Board locked — click to unlock"
+            : "Lock the board (others become read-only)"}
+        >
+          {#if boardLocked}
+            <LockIcon strokeWidth={1.5} class="p-0.5" />
+          {:else}
+            <UnlockIcon strokeWidth={1.5} class="p-0.5" />
+          {/if}
+        </button>
+        <button
+          class="icon-button"
+          class:broadcast-on={broadcastMode}
+          on:click={() => dispatch("broadcast")}
+          disabled={!connected || hasWriteAccess === false}
+          title={broadcastMode
+            ? "Broadcast ON — typing goes to ALL terminals (click to stop)"
+            : "Broadcast input to all terminals at once"}
+        >
+          <RadioIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("snippets")}
+          title="Command snippets — click to paste"
+        >
+          <ClipboardIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("files")}
+          title="File explorer"
+        >
+          <FolderIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          class:active={numpadOpen}
+          on:click={() => dispatch("numpad")}
+          disabled={!connected}
+          title={numpadOpen ? "Hide numpad" : "Show numpad"}
+        >
+          <HashIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("doc")}
+          title="Shared document"
+        >
+          <Edit2Icon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("chat")}
+          title="Chat"
+        >
+          <MessageSquareIcon strokeWidth={1.5} class="p-0.5" />
+          {#if newMessages}
+            <div class="activity" />
+          {/if}
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("settings")}
+          title="Settings"
+        >
+          <SettingsIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
       </div>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("center")}
-        title="Center / reset view"
-      >
-        <CrosshairIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("clear")}
-        disabled={!connected || hasWriteAccess === false}
-        title="Clear the board (notes/images/videos)"
-      >
-        <Trash2Icon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        class:lock-on={boardLocked}
-        on:click={() => dispatch("lock")}
-        disabled={!connected || hasWriteAccess === false}
-        title={boardLocked
-          ? "Board locked — click to unlock"
-          : "Lock the board (others become read-only)"}
-      >
-        {#if boardLocked}
-          <LockIcon strokeWidth={1.5} class="p-0.5" />
-        {:else}
-          <UnlockIcon strokeWidth={1.5} class="p-0.5" />
-        {/if}
-      </button>
-      <button
-        class="icon-button"
-        class:broadcast-on={broadcastMode}
-        on:click={() => dispatch("broadcast")}
-        disabled={!connected || hasWriteAccess === false}
-        title={broadcastMode
-          ? "Broadcast ON — typing goes to ALL terminals (click to stop)"
-          : "Broadcast input to all terminals at once"}
-      >
-        <RadioIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("snippets")}
-        title="Command snippets — click to paste"
-      >
-        <ClipboardIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("files")}
-        title="File explorer"
-      >
-        <FolderIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        class:active={numpadOpen}
-        on:click={() => dispatch("numpad")}
-        disabled={!connected}
-        title={numpadOpen ? "Hide numpad" : "Show numpad"}
-      >
-        <HashIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("doc")}
-        title="Shared document"
-      >
-        <Edit2Icon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("chat")}
-        title="Chat"
-      >
-        <MessageSquareIcon strokeWidth={1.5} class="p-0.5" />
-        {#if newMessages}
-          <div class="activity" />
-        {/if}
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("settings")}
-        title="Settings"
-      >
-        <SettingsIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-    </div>
 
-    <div class="v-divider" />
+      <div class="v-divider" />
 
-    <!-- maw share workboard extensions: voice, image, screen-share -->
-    <div class="flex space-x-1">
-      <button
-        class="icon-button"
-        class:recording={micRecording}
-        on:click={() => dispatch("micDown")}
-        disabled={!connected}
-        title={micRecording ? "Mute mic" : "Unmute mic"}
-      >
-        <MicIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("image")}
-        disabled={!connected || hasWriteAccess === false}
-        title="Add image to board"
-      >
-        <ImageIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("note")}
-        disabled={!connected || hasWriteAccess === false}
-        title="Add sticky note"
-      >
-        <FileTextIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("video")}
-        disabled={!connected || hasWriteAccess === false}
-        title="Add video to board"
-      >
-        <FilmIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        class:active={cameraActive}
-        on:click={() => dispatch("camera")}
-        disabled={!connected}
-        title={cameraActive ? "Stop camera" : "Start camera"}
-      >
-        <VideoIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-    </div>
+      <!-- maw share workboard extensions: voice, image, screen-share -->
+      <div class="flex space-x-1">
+        <button
+          class="icon-button"
+          class:recording={micRecording}
+          on:click={() => dispatch("micDown")}
+          disabled={!connected}
+          title={micRecording ? "Mute mic" : "Unmute mic"}
+        >
+          <MicIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("image")}
+          disabled={!connected || hasWriteAccess === false}
+          title="Add image to board"
+        >
+          <ImageIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("note")}
+          disabled={!connected || hasWriteAccess === false}
+          title="Add sticky note"
+        >
+          <FileTextIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("video")}
+          disabled={!connected || hasWriteAccess === false}
+          title="Add video to board"
+        >
+          <FilmIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          class:active={cameraActive}
+          on:click={() => dispatch("camera")}
+          disabled={!connected}
+          title={cameraActive ? "Stop camera" : "Start camera"}
+        >
+          <VideoIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+      </div>
 
-    <div class="v-divider" />
+      <div class="v-divider" />
 
-    <div class="flex space-x-1">
-      <button
-        class="icon-button"
-        on:click={() => dispatch("youtube")}
-        title="YouTube — play music"
-      >
-        <YoutubeIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-      <button
-        class="icon-button"
-        on:click={() => dispatch("networkInfo")}
-        title="Network info"
-      >
-        <WifiIcon strokeWidth={1.5} class="p-0.5" />
-      </button>
-    </div>
+      <div class="flex space-x-1">
+        <button
+          class="icon-button"
+          on:click={() => dispatch("youtube")}
+          title="YouTube — play music"
+        >
+          <YoutubeIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+        <button
+          class="icon-button"
+          on:click={() => dispatch("networkInfo")}
+          title="Network info"
+        >
+          <WifiIcon strokeWidth={1.5} class="p-0.5" />
+        </button>
+      </div>
     {/if}
   </div>
 </div>

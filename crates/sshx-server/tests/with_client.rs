@@ -313,8 +313,8 @@ async fn test_files_api() -> Result<()> {
     assert!(text.contains("\"path\":"));
     assert!(text.contains("\"items\":"));
 
-    // Create a temporary file inside /root/maw-workspace to test reading
-    let temp_file_path = std::path::Path::new("/root/maw-workspace/test_hello.txt");
+    // Create a temporary file inside the hermetic MAW_FILES_ROOT to test reading
+    let temp_file_path = test_files_root().join("test_hello.txt");
     tokio::fs::write(&temp_file_path, b"hello workspace file!").await?;
 
     // 2. Test reading the file
@@ -355,8 +355,7 @@ async fn test_files_api() -> Result<()> {
     // 5. Test symlink escape rejection: a harmless-looking name inside the root
     // must not serve a target outside FILES_ROOT.
     let symlink_escape_name = format!("{}_symlink_escape.txt", test_prefix);
-    let symlink_escape_path =
-        std::path::PathBuf::from(format!("/root/maw-workspace/{symlink_escape_name}"));
+    let symlink_escape_path = test_files_root().join(&symlink_escape_name);
     tokio::fs::remove_file(&symlink_escape_path).await.ok();
     std::os::unix::fs::symlink("/etc/passwd", &symlink_escape_path)?;
     let url_symlink_escape = format!(
@@ -372,10 +371,8 @@ async fn test_files_api() -> Result<()> {
     // file inside the root must still be blocked after canonicalization.
     let restricted_target_name = format!("{}_secret_target.txt", test_prefix);
     let restricted_link_name = format!("{}_public_link.txt", test_prefix);
-    let restricted_target =
-        std::path::PathBuf::from(format!("/root/maw-workspace/{restricted_target_name}"));
-    let restricted_link =
-        std::path::PathBuf::from(format!("/root/maw-workspace/{restricted_link_name}"));
+    let restricted_target = test_files_root().join(&restricted_target_name);
+    let restricted_link = test_files_root().join(&restricted_link_name);
     tokio::fs::remove_file(&restricted_link).await.ok();
     tokio::fs::write(&restricted_target, b"secret through symlink").await?;
     std::os::unix::fs::symlink(&restricted_target, &restricted_link)?;
@@ -391,8 +388,7 @@ async fn test_files_api() -> Result<()> {
 
     // 7. Test symlinked directory escape rejection on /api/files.
     let symlink_dir_name = format!("{}_symlink_dir", test_prefix);
-    let symlink_dir_path =
-        std::path::PathBuf::from(format!("/root/maw-workspace/{symlink_dir_name}"));
+    let symlink_dir_path = test_files_root().join(&symlink_dir_name);
     tokio::fs::remove_file(&symlink_dir_path).await.ok();
     std::os::unix::fs::symlink("/etc", &symlink_dir_path)?;
     let url_symlink_dir = format!(
@@ -405,7 +401,7 @@ async fn test_files_api() -> Result<()> {
     tokio::fs::remove_file(&symlink_dir_path).await.ok();
 
     // 8. Test dotfile rejection
-    let dotfile_path = std::path::Path::new("/root/maw-workspace/.test_dotfile");
+    let dotfile_path = test_files_root().join(".test_dotfile");
     tokio::fs::write(&dotfile_path, b"hidden content").await?;
     let url_dotfile = format!("http://{}/api/file?path=.test_dotfile", server.local_addr());
     let resp = client.get(&url_dotfile).send().await?;
@@ -413,7 +409,7 @@ async fn test_files_api() -> Result<()> {
     tokio::fs::remove_file(&dotfile_path).await.ok();
 
     // 9. Test directory rejection
-    let temp_dir_path = std::path::Path::new("/root/maw-workspace/test_dir");
+    let temp_dir_path = test_files_root().join("test_dir");
     tokio::fs::create_dir(&temp_dir_path).await?;
     let url_dir = format!("http://{}/api/file?path=test_dir", server.local_addr());
     let resp = client.get(&url_dir).send().await?;
@@ -421,7 +417,7 @@ async fn test_files_api() -> Result<()> {
     tokio::fs::remove_dir(&temp_dir_path).await.ok();
 
     // 10. Test binary file rejection (invalid UTF-8 bytes)
-    let binary_path = std::path::Path::new("/root/maw-workspace/test_binary.bin");
+    let binary_path = test_files_root().join("test_binary.bin");
     tokio::fs::write(&binary_path, b"hello \xff\xff world").await?;
     let url_binary = format!(
         "http://{}/api/file?path=test_binary.bin",
@@ -433,7 +429,7 @@ async fn test_files_api() -> Result<()> {
     tokio::fs::remove_file(&binary_path).await.ok();
 
     // 11. Test file size > 1 MiB -> 413 Payload Too Large
-    let large_path = std::path::Path::new("/root/maw-workspace/test_large.txt");
+    let large_path = test_files_root().join("test_large.txt");
     let large_data = vec![b'a'; 1024 * 1024 + 10];
     tokio::fs::write(&large_path, &large_data).await?;
     let url_large = format!(
@@ -529,7 +525,7 @@ async fn test_board_password_gate() -> Result<()> {
     assert_eq!(resp.status(), http::StatusCode::OK);
 
     let file_name = format!("sshx_auth_test_{}.txt", server.local_addr().port());
-    let file_path = std::path::PathBuf::from(format!("/root/maw-workspace/{file_name}"));
+    let file_path = test_files_root().join(&file_name);
     tokio::fs::write(&file_path, b"authed file").await?;
     let resp = client
         .get(format!("{base}/api/file?path={file_name}"))

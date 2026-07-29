@@ -5,12 +5,7 @@
  * Signaling (offer/answer/ICE) flows through the existing sshx WS relay via
  * Signal messages. Media tracks go peer-to-peer (or via TURN when NAT blocks).
  *
- * Usage flow:
- *   1. On join: create RtcMesh with local userId + send callback
- *   2. When a new user appears: mesh.addPeer(uid) — initiator sends offer
- *   3. When Signal arrives from relay: mesh.handleSignal(from, payload)
- *   4. To add local mic/video: mesh.addTrack(track)
- *   5. On leave: mesh.dispose()
+ * ICE servers are build-time configurable via Vite env.
  */
 
 type SignalPayload =
@@ -32,20 +27,45 @@ export type RtcConfig = {
 };
 
 const DEFAULT_CONFIG: RtcConfig = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turns:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-  ],
+  iceServers: iceServersFromEnv(),
 };
+
+function splitUrls(value: string | undefined) {
+  return (value ?? "")
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+
+function parseIceServersJson(value: string | undefined) {
+  if (!value?.trim()) return null;
+  try {
+    const parsed = JSON.parse(value) as { iceServers?: RTCIceServer[] };
+    return Array.isArray(parsed) ? parsed : parsed.iceServers ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function iceServersFromEnv(env = import.meta.env): RTCIceServer[] {
+  const jsonServers = parseIceServersJson(env.VITE_RTC_ICE_SERVERS);
+  if (jsonServers) return jsonServers;
+
+  const iceServers: RTCIceServer[] = [];
+  const stunUrls = splitUrls(env.VITE_RTC_STUN_URLS);
+  if (stunUrls.length) iceServers.push({ urls: stunUrls });
+
+  const turnUrls = splitUrls(env.VITE_RTC_TURN_URLS);
+  if (turnUrls.length) {
+    iceServers.push({
+      urls: turnUrls,
+      username: env.VITE_RTC_TURN_USERNAME,
+      credential: env.VITE_RTC_TURN_CREDENTIAL,
+    });
+  }
+
+  return iceServers;
+}
 
 export class RtcMesh {
   readonly myUid: number;

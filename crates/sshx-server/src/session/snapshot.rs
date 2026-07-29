@@ -122,6 +122,7 @@ impl Session {
         session.source.send_replace(winsizes);
         {
             use std::collections::HashMap;
+
             use tracing::warn;
 
             let mut board = session.board.lock();
@@ -155,7 +156,6 @@ impl Session {
         Ok(session)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
