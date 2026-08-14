@@ -47,10 +47,11 @@ pub struct WsUser {
     pub can_write: bool,
 }
 
-/// A collaborative board item — a maw share workboard extension on top of sshx's
-/// terminals. Persisted in the session snapshot. For `kind:"stream"` this is just
-/// a placeholder tile (no frame data); live frames flow ephemerally via
-/// `StreamFrame` so the snapshot stays small and the broadcast channel can't flood.
+/// A collaborative board item — a maw share workboard extension on top of
+/// sshx's terminals. Persisted in the session snapshot. For `kind:"stream"`
+/// this is just a placeholder tile (no frame data); live frames flow
+/// ephemerally via `StreamFrame` so the snapshot stays small and the broadcast
+/// channel can't flood.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct BoardItem {

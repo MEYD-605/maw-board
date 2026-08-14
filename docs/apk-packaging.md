@@ -1,8 +1,8 @@
 # APK Packaging — Oracle Board (TWA)
 
-Wrap the Oracle Board PWA as a native Android `.apk` using Trusted Web Activity (TWA).
-The app is a thin shell that opens `ssh.example.com/go` in a Chrome Custom Tab with
-no browser chrome — it looks and feels like a native app.
+Wrap the Oracle Board PWA as a native Android `.apk` using Trusted Web Activity
+(TWA). The app is a thin shell that opens `ssh.example.com/go` in a Chrome
+Custom Tab with no browser chrome — it looks and feels like a native app.
 
 ## Prerequisites
 
@@ -58,14 +58,16 @@ keytool -list -v -keystore your-keystore.jks -alias your-alias | grep SHA256
 ### 2. Create the file
 
 ```json
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.example.oracleboard",
-    "sha256_cert_fingerprints": ["YOUR:SHA256:FINGERPRINT:HERE"]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.oracleboard",
+      "sha256_cert_fingerprints": ["YOUR:SHA256:FINGERPRINT:HERE"]
+    }
   }
-}]
+]
 ```
 
 ### 3. Deploy
@@ -96,6 +98,7 @@ adb shell am start -a android.intent.action.VIEW \
 
 Use the `.aab` (Android App Bundle) for Play Store upload. The `.apk` is for
 direct sideloading / testing. Play Store requires:
+
 - Screenshots (phone + tablet)
 - Privacy policy URL
 - Content rating questionnaire
@@ -104,6 +107,8 @@ direct sideloading / testing. Play Store requires:
 ## Notes
 
 - TWA requires Chrome 72+ on the device (covers 99%+ of Android)
-- If asset links aren't verified, the app falls back to a Custom Tab (shows URL bar)
-- Updates are automatic — the TWA always loads the latest web content from the server
+- If asset links aren't verified, the app falls back to a Custom Tab (shows URL
+  bar)
+- Updates are automatic — the TWA always loads the latest web content from the
+  server
 - Offline support comes from the service worker (`sw.js`)

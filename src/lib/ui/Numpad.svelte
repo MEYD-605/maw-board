@@ -192,7 +192,10 @@
     } catch {
       // Fall through to the default thumb-friendly lower-right placement.
     }
-    ({ x, y } = clampPosition(window.innerWidth - PANEL_W - 16, window.innerHeight - PANEL_H - 24));
+    ({ x, y } = clampPosition(
+      window.innerWidth - PANEL_W - 16,
+      window.innerHeight - PANEL_H - 24,
+    ));
   }
 
   function startDrag(event: PointerEvent) {
@@ -206,15 +209,20 @@
   }
 
   function onMove(event: PointerEvent) {
-    if (!dragging || (pointerId !== null && event.pointerId !== pointerId)) return;
+    if (!dragging || (pointerId !== null && event.pointerId !== pointerId))
+      return;
     event.preventDefault();
-    const pos = clampPosition(event.clientX - dragOffsetX, event.clientY - dragOffsetY);
+    const pos = clampPosition(
+      event.clientX - dragOffsetX,
+      event.clientY - dragOffsetY,
+    );
     x = pos.x;
     y = pos.y;
   }
 
   function endDrag(event: PointerEvent) {
-    if (!dragging || (pointerId !== null && event.pointerId !== pointerId)) return;
+    if (!dragging || (pointerId !== null && event.pointerId !== pointerId))
+      return;
     dragging = false;
     pointerId = null;
     savePosition();
@@ -301,7 +309,10 @@
   {#if page === "pad"}
     <div class="keys">
       {#each rows as row}
-        <div class="key-row" style:grid-template-columns={`repeat(${row.length}, minmax(0, 1fr))`}>
+        <div
+          class="key-row"
+          style:grid-template-columns={`repeat(${row.length}, minmax(0, 1fr))`}
+        >
           {#each row as key}
             <button
               class="key"

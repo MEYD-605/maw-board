@@ -71,22 +71,35 @@
     <div class="head">◉ ORACLE BOARD · system</div>
 
     <div class="metric">
-      <div class="line"><span class="lbl">CPU</span><span class="val">{cpu}%</span></div>
-      <div class="track"><div class="fill {level(cpu)}" style:width="{cpu}%" /></div>
+      <div class="line">
+        <span class="lbl">CPU</span><span class="val">{cpu}%</span>
+      </div>
+      <div class="track">
+        <div class="fill {level(cpu)}" style:width="{cpu}%" />
+      </div>
     </div>
 
     <div class="metric">
       <div class="line">
-        <span class="lbl">RAM</span><span class="val">{gb(memUsedMb)}/{gb(memTotalMb)} GB</span>
+        <span class="lbl">RAM</span><span class="val"
+          >{gb(memUsedMb)}/{gb(memTotalMb)} GB</span
+        >
       </div>
-      <div class="track"><div class="fill {level(memPct)}" style:width="{memPct}%" /></div>
+      <div class="track">
+        <div class="fill {level(memPct)}" style:width="{memPct}%" />
+      </div>
     </div>
 
     {#if temp !== null}
       <div class="metric">
-        <div class="line"><span class="lbl">TEMP</span><span class="val">{temp}°C</span></div>
+        <div class="line">
+          <span class="lbl">TEMP</span><span class="val">{temp}°C</span>
+        </div>
         <div class="track">
-          <div class="fill {level(temp)}" style:width="{Math.min(temp, 100)}%" />
+          <div
+            class="fill {level(temp)}"
+            style:width="{Math.min(temp, 100)}%"
+          />
         </div>
       </div>
     {/if}
@@ -103,13 +116,23 @@
         <span class="dot" class:online={arra?.ok} />
       </div>
       {#if arra}
-        <div class="row"><span class="lbl">DOCS</span><span class="val">{arra.total.toLocaleString()}</span></div>
         <div class="row">
-          <span class="lbl">DB</span><span class="val">{(arra.dbMb / 1024).toFixed(1)} GB</span>
+          <span class="lbl">DOCS</span><span class="val"
+            >{arra.total.toLocaleString()}</span
+          >
+        </div>
+        <div class="row">
+          <span class="lbl">DB</span><span class="val"
+            >{(arra.dbMb / 1024).toFixed(1)} GB</span
+          >
         </div>
         <div class="row">
           <span class="lbl">INDEX</span>
-          <span class="val">{arra.indexAgeHours != null ? `${arra.indexAgeHours.toFixed(1)}h ago` : "—"}</span>
+          <span class="val"
+            >{arra.indexAgeHours != null
+              ? `${arra.indexAgeHours.toFixed(1)}h ago`
+              : "—"}</span
+          >
         </div>
         {#if arra.byType}
           <div class="types">
@@ -119,7 +142,9 @@
           </div>
         {/if}
       {:else}
-        <div class="row"><span class="lbl">arra</span><span class="val">offline</span></div>
+        <div class="row">
+          <span class="lbl">arra</span><span class="val">offline</span>
+        </div>
       {/if}
     </div>
   </div>
