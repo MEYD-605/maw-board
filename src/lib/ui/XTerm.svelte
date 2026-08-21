@@ -176,6 +176,42 @@
     termEl?.dispatchEvent(new WheelEvent(event.type, event));
   }
 
+  function primeMobileTextarea(clientX: number, clientY: number) {
+    if (!term?.textarea || !termEl) return;
+    const coarse =
+      typeof matchMedia === "function" &&
+      matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (!coarse) return;
+
+    // xterm keeps the helper textarea at left:-9999em with 0x0 size. Desktop
+    // browsers focus that fine, but iOS/iPadOS often refuses to show the
+    // software keyboard unless the focused textarea is in the tapped viewport.
+    const screen = termEl.querySelector(".xterm-screen") as HTMLElement | null;
+    const rect = (screen ?? termEl).getBoundingClientRect();
+    const left = Math.max(0, Math.min(rect.width - 1, clientX - rect.left));
+    const top = Math.max(0, Math.min(rect.height - 1, clientY - rect.top));
+    const textarea = term.textarea;
+    textarea.style.left = `${left}px`;
+    textarea.style.top = `${top}px`;
+    textarea.style.width = "1px";
+    textarea.style.height = "1px";
+    textarea.style.lineHeight = "1px";
+    textarea.style.zIndex = "1000";
+  }
+
+  function focusFromPointer(event: PointerEvent) {
+    if (event.button !== 0 || !term) return;
+    primeMobileTextarea(event.clientX, event.clientY);
+    term.focus();
+  }
+
+  function focusFromTouch(event: TouchEvent) {
+    if (!term) return;
+    const touch = event.changedTouches[0] ?? event.touches[0];
+    if (touch) primeMobileTextarea(touch.clientX, touch.clientY);
+    term.focus();
+  }
+
   function setFocused(isFocused: boolean, cursorLayer: HTMLDivElement) {
     if (isFocused && !focused) {
       focused = isFocused;
@@ -504,6 +540,8 @@
     class="inline-block px-4 py-2 transition-opacity duration-500"
     bind:this={termEl}
     style:opacity={loaded ? 1.0 : 0.0}
+    on:pointerdown={focusFromPointer}
+    on:touchstart={focusFromTouch}
     on:wheel={(event) => {
       if (focused) {
         // Don't pan the page when scrolling while the terminal is selected.

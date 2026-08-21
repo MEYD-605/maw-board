@@ -5,3 +5,7 @@
 /node_modules
 /.svelte-kit
 /build
+maw-ssh/.svelte-kit/output/client/_app/immutable/chunks/xterm-addon-webgl.a9ff0b03.js
+maw-ssh/.svelte-kit/output/client/_app/immutable/chunks/xterm.75eb5c69.js
+maw-ssh/build/_app/immutable/chunks/xterm-addon-webgl.a9ff0b03.js
+maw-ssh/build/_app/immutable/chunks/xterm.75eb5c69.js
