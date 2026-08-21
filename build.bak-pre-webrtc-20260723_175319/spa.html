@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <meta name="theme-color" content="#0e0e10" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+
+    <title>Oracle Board</title>
+    <meta property="og:title" content="Oracle Board — collaborative workspace" />
+    <meta
+      name="description"
+      content="Collaborative live terminals, voice, screen-share, and board in the browser."
+    />
+    <meta
+      property="og:description"
+      content="Collaborative live terminals, voice, screen-share, and board in the browser."
+    />
+
+    
+		<link rel="modulepreload" href="/_app/immutable/entry/start.01f1a8c5.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/index.cd375eea.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/singletons.04c7b63a.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/index.44ba6fab.js">
+		<link rel="modulepreload" href="/_app/immutable/entry/app.c798f6c3.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/preload-helper.a4192956.js">
+  </head>
+  <body class="dark:bg-[#0e0e10] dark:text-white">
+    <div>
+			<script>
+				{
+					__sveltekit_1macx3p = {
+						base: "",
+						env: {}
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("/_app/immutable/entry/start.01f1a8c5.js"),
+						import("/_app/immutable/entry/app.c798f6c3.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+      }
+    </script>
+  </body>
+</html>
