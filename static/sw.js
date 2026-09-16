@@ -7,7 +7,7 @@
 // our static icons; navigations, the manifest, /api and websockets are left to
 // the browser, so the SW can never break a page or session load again.
 
-const CACHE_NAME = "oracle-board-v2";
+const CACHE_NAME = "oracle-board-v6-fullscreen";
 const PRECACHE = ["/icon-192.png", "/icon-512.png", "/icon.svg"];
 
 self.addEventListener("install", (event) => {

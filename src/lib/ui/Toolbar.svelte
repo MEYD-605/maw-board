@@ -19,6 +19,8 @@
     UnlockIcon,
     Trash2Icon,
     ImageIcon,
+    Maximize2Icon,
+    Minimize2Icon,
     MessageSquareIcon,
     MicIcon,
     PlusCircleIcon,
@@ -67,6 +69,49 @@
   let collapsed = false;
   let showTileMenu = false;
   let brandMenuOpen = false;
+  let isFullscreen = false;
+
+  function updateFullscreen() {
+    isFullscreen = !!(
+      document.fullscreenElement ||
+      (document as any).webkitFullscreenElement ||
+      (document as any).mozFullScreenElement ||
+      (document as any).msFullscreenElement
+    );
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+      const el = document.documentElement as any;
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {});
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      }
+    } else {
+      const doc = document as any;
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen().catch(() => {});
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      }
+    }
+  }
+
+  import { onMount, onDestroy } from "svelte";
+
+  onMount(() => {
+    updateFullscreen();
+    document.addEventListener("fullscreenchange", updateFullscreen);
+    document.addEventListener("webkitfullscreenchange", updateFullscreen);
+  });
+
+  onDestroy(() => {
+    if (typeof document !== "undefined") {
+      document.removeEventListener("fullscreenchange", updateFullscreen);
+      document.removeEventListener("webkitfullscreenchange", updateFullscreen);
+    }
+  });
 </script>
 
 <!-- Single row + horizontal scroll on small screens. While a dropdown is open
@@ -296,6 +341,18 @@
         title="Network info"
       >
         <WifiIcon strokeWidth={1.5} class="p-0.5" />
+      </button>
+      <button
+        class="icon-button"
+        class:active={isFullscreen}
+        on:click={toggleFullscreen}
+        title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen (เต็มจอ)"}
+      >
+        {#if isFullscreen}
+          <Minimize2Icon strokeWidth={1.5} class="p-0.5" />
+        {:else}
+          <Maximize2Icon strokeWidth={1.5} class="p-0.5" />
+        {/if}
       </button>
     </div>
     {/if}
