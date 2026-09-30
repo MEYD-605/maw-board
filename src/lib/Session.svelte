@@ -53,6 +53,7 @@
   import FileExplorer from "./ui/FileExplorer.svelte";
   import MarkdownDoc from "./ui/MarkdownDoc.svelte";
   import Numpad from "./ui/Numpad.svelte";
+  import FleetBar from "./ui/FleetBar.svelte";
   import SnippetBar from "./ui/SnippetBar.svelte";
   import YouTubePopup from "./ui/YouTubePopup.svelte";
   import Avatars from "./ui/Avatars.svelte";
@@ -692,6 +693,45 @@
       return;
     }
     handleSnapButton(id, action);
+  }
+
+  function handleFleetSelect(code: string) {
+    if (!canEdit) {
+      makeToast({ kind: "info", message: "Read-only mode." });
+      return;
+    }
+    const live = focused[0];
+    const target =
+      live !== undefined
+        ? live
+        : shells.some(([sid]) => sid === lastFocused)
+          ? lastFocused
+          : shells[0]?.[0];
+    if (target === undefined) {
+      handleCreate();
+      setTimeout(() => handleFleetSelect(code), 600);
+      return;
+    }
+    // Detach current tmux session first, then send agent selection code
+    routeInput(target, new Uint8Array([2, 100])); // Ctrl-B d
+    setTimeout(() => {
+      routeInput(target, new TextEncoder().encode(`${code}\n`));
+    }, 200);
+  }
+
+  function handleFleetDetach() {
+    if (!canEdit) return;
+    const live = focused[0];
+    const target =
+      live !== undefined
+        ? live
+        : shells.some(([sid]) => sid === lastFocused)
+          ? lastFocused
+          : shells[0]?.[0];
+    if (target !== undefined) {
+      routeInput(target, new Uint8Array([2, 100])); // Ctrl-B d
+      makeToast({ kind: "info", message: "Detached back to Oracle Menu" });
+    }
   }
 
   // ── Terminal labels (Bo 2026-06-13) ───────────────────────────────────────
@@ -2496,4 +2536,13 @@
       </div>
     {/each}
   </div>
+
+  {#if canEdit && !boardLocked}
+    <FleetBar
+      {canEdit}
+      on:select={({ detail }) => handleFleetSelect(detail)}
+      on:detach={handleFleetDetach}
+      on:create={handleCreate}
+    />
+  {/if}
 </main>
